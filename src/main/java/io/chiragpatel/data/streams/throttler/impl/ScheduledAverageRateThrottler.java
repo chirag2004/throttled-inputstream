@@ -87,7 +87,7 @@ public class ScheduledAverageRateThrottler implements InputStreamThrottler {
         int targetThrottleRate = getTargetThrottleRate();
 
         if( targetThrottleRate == -1){
-            //no throttling
+            //should never happen
             return 0;
         }
 
@@ -98,6 +98,7 @@ public class ScheduledAverageRateThrottler implements InputStreamThrottler {
         if(sleepTime > 0){
             return sleepTime;
         }
+        //we are below the bandwith usage. No need to sleep
         return 0;
     }
 
