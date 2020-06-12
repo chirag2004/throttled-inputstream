@@ -21,7 +21,7 @@ public class ScheduledAverageRateThrottler implements InputStreamThrottler {
 
     private AtomicLong totalBytesRead = new AtomicLong(0);
     private AtomicLong firstReadTime = new AtomicLong(-1);
-    private volatile boolean usable = false;
+    private volatile boolean usable = true;
 
 
     private List<ThrottleSchedule> throttleSpecs =  new CopyOnWriteArrayList<>();
@@ -111,6 +111,7 @@ public class ScheduledAverageRateThrottler implements InputStreamThrottler {
                 return throttleSpec.getRateBytesPerSecond();
             }
         }
+        //should never happen since constructor does not allow empty throttle schedule
         return -1;
     }
 

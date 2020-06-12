@@ -1,6 +1,9 @@
 package io.chiragpatel.data.streams;
 
 import io.chiragpatel.data.streams.throttler.impl.ScheduledAverageRateThrottler;
+import io.chiragpatel.data.streams.throttler.impl.ThrottleSchedule;
+import io.chiragpatel.data.streams.throttler.impl.ThrottleTime;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 import org.joda.time.DateTime;
 import org.mockito.InOrder;
@@ -33,7 +36,8 @@ public class TestThrottleInputStream {
     @BeforeMethod
     public void init(){
         MockitoAnnotations.initMocks(this);
-        throttler  = spy(new ScheduledAverageRateThrottler());
+        ThrottleSchedule schedule = new ThrottleSchedule(new ThrottleTime(0,0,0), new ThrottleTime(6,0,0), 64);
+        throttler  = spy(new ScheduledAverageRateThrottler(Arrays.asList(schedule)));
         throttledInputStream = new ThrottledInputStreamFactory(throttler).create(inputStream);
     }
 

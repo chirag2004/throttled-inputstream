@@ -52,12 +52,11 @@ public class TestScheduledAverageRateThrottler {
     }
 
     @Test
-    public void shouldReturnMaxRateWhenNoTimeIsScheduled(){
+    public void shouldReturnNegativeOneWhenNoTimeIsScheduled(){
 
         setCurrentTime(9,0,0);
 
-        assertEquals(throttler.getTargetThrottleRate(), Integer.MAX_VALUE);
-
+        assertEquals(throttler.getTargetThrottleRate(), -1);
 
     }
 
