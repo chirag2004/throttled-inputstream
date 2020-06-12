@@ -1,6 +1,7 @@
 package io.chiragpatel.data.streams;
 
 import io.chiragpatel.data.streams.throttler.impl.ScheduledAverageRateThrottler;
+import java.util.concurrent.atomic.AtomicLong;
 import org.joda.time.DateTime;
 import org.mockito.InOrder;
 import org.mockito.Mock;
@@ -34,7 +35,6 @@ public class TestThrottleInputStream {
         MockitoAnnotations.initMocks(this);
         throttler  = spy(new ScheduledAverageRateThrottler());
         throttledInputStream = new ThrottledInputStreamFactory(throttler).create(inputStream);
-
     }
 
     @Test
@@ -115,7 +115,7 @@ public class TestThrottleInputStream {
     }
 
     @Test
-    public void shouldCallThrottlerWithMaxWaitTime() throws IOException{
+    public void shouldCallThrottlerWithMaxWaitTime() throws IOException {
 
         ThrottledInputStream throttledInputStream1 = new ThrottledInputStream(inputStream, throttler, 50);
         byte[] bytes = new byte[10];
@@ -124,5 +124,4 @@ public class TestThrottleInputStream {
         verify(throttler).throttle(eq(50L));
 
     }
-
 }

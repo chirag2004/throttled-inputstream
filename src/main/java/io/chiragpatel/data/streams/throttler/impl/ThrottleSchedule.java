@@ -9,26 +9,26 @@ package io.chiragpatel.data.streams.throttler.impl;
 public class ThrottleSchedule {
     private ThrottleTime start;
     private ThrottleTime end;
-    private int rateInBytes;
+    private int rateInBytesPerSecond;
 
 
-    public ThrottleSchedule(ThrottleTime start, ThrottleTime end, int rateInBytes) {
+    public ThrottleSchedule(ThrottleTime start, ThrottleTime end, int rateInBytesPerSecond) {
         if(start == null){
             throw new IllegalArgumentException("start date cannot be null");
         }
         if(end == null) {
             throw new IllegalArgumentException("start date cannot be null");
         }
-        if(rateInBytes <= 0){
-            throw new IllegalArgumentException("rate in bytes cannot be null");
+        if(rateInBytesPerSecond <= 0){
+            throw new IllegalArgumentException("rate must be greater than 0");
         }
         this.start = start;
         this.end = end;
-        this.rateInBytes = rateInBytes;
+        this.rateInBytesPerSecond = rateInBytesPerSecond;
     }
 
-    public int getRateInBytes() {
-        return rateInBytes;
+    public int getRateBytesPerSecond() {
+        return rateInBytesPerSecond;
     }
 
     public boolean matches(long time){

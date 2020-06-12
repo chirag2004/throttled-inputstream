@@ -1,11 +1,11 @@
 package io.chiragpatel.data.streams.throttler.impl;
 
 import io.chiragpatel.data.streams.throttler.InputStreamThrottler;
-import org.joda.time.DateTime;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicLongArray;
 
 /**
  * Created by Chirag Patel
@@ -21,7 +21,7 @@ public class ScheduledAverageRateThrottler implements InputStreamThrottler {
 
     private AtomicLong totalBytesRead = new AtomicLong(0);
     private AtomicLong firstReadTime = new AtomicLong(-1);
-    private volatile boolean usable = true;
+    private volatile boolean usable = false;
 
 
     private List<ThrottleSchedule> throttleSpecs =  new CopyOnWriteArrayList<>();
@@ -30,26 +30,32 @@ public class ScheduledAverageRateThrottler implements InputStreamThrottler {
     }
 
     public ScheduledAverageRateThrottler(List<ThrottleSchedule> throttleSpecs){
-        if(throttleSpecs != null){
+        if(throttleSpecs != null && throttleSpecs.size() > 0){
             this.throttleSpecs.addAll(throttleSpecs);
+        } else {
+            throw new IllegalArgumentException("throttling specs are required");
         }
-    }
 
+    }
 
     @Override
     public void notifyRead(int size){
 
         firstReadTime.compareAndSet(-1,getCurrentTimeMillis());
-        try{
-            totalBytesRead.addAndGet(size);
-            //catch overflows
-        } catch (ArithmeticException ae){
+        if(totalBytesRead.addAndGet(size) < 0) {
+            //we have exceed the positive range of long which in zettabytes!
+            //This can be handled by capturing previousAverage and including it
+            //in the sleep time calculations. However, this results in more synchronized blocks and contention.
             usable = false;
         }
-
     }
 
     @Override
+    /**
+     * This method (and the method it calls) is not synchronized because we only care about averages. Due to race conditions this method may not
+     * work correctly for a small time window but eventually will average out. For a large number of threads, synchronized blocks
+     * can cause contention and we are trading off accuracy in favor of less contention and settling for eventual average case accuracy
+     */
     public void throttle(long maxWaitTimeMillis){
 
         if(!usable){
@@ -83,11 +89,12 @@ public class ScheduledAverageRateThrottler implements InputStreamThrottler {
         //if totalBytesRead > 0 we are guaranteed that the first read has occurred..
         int targetThrottleRate = getTargetThrottleRate();
 
-        if(Integer.MAX_VALUE == targetThrottleRate){
+        if( targetThrottleRate == -1){
+            //no throttling
             return 0;
         }
 
-        // (totalBytesRead/((finalTime - firstReadTime)/1000)) < targetThrottleRate
+        // this inequality must always hold! (totalBytesRead/((finalTime - firstReadTime)/1000)) < targetThrottleRate
         long finalTime =  ((totalBytesRead.get())/ getTargetThrottleRate()) * 1000 + firstReadTime.get();
         long sleepTime =  finalTime - getCurrentTimeMillis();
 
@@ -110,15 +117,13 @@ public class ScheduledAverageRateThrottler implements InputStreamThrottler {
         for (ThrottleSchedule throttleSpec : throttleSpecs) {
 
             if(throttleSpec != null && throttleSpec.matches(now)){
-                return throttleSpec.getRateInBytes();
+                return throttleSpec.getRateBytesPerSecond();
             }
         }
-        return Integer.MAX_VALUE;
+        return -1;
     }
 
     long getCurrentTimeMillis(){
         return System.currentTimeMillis();
     }
-
-
 }

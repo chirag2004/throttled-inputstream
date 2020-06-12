@@ -3,6 +3,7 @@ package io.chiragpatel.data.streams;
 import io.chiragpatel.data.streams.throttler.InputStreamThrottler;
 
 import java.io.InputStream;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created by Chirag Patel on 8/26/14.
