@@ -26,9 +26,6 @@ public class ScheduledAverageRateThrottler implements InputStreamThrottler {
 
     private List<ThrottleSchedule> throttleSpecs =  new CopyOnWriteArrayList<>();
 
-    public ScheduledAverageRateThrottler(){
-    }
-
     public ScheduledAverageRateThrottler(List<ThrottleSchedule> throttleSpecs){
         if(throttleSpecs != null && throttleSpecs.size() > 0){
             this.throttleSpecs.addAll(throttleSpecs);
@@ -102,12 +99,6 @@ public class ScheduledAverageRateThrottler implements InputStreamThrottler {
             return sleepTime;
         }
         return 0;
-    }
-
-
-    public ScheduledAverageRateThrottler addThrottleTimeRange(ThrottleTime start, ThrottleTime end, int maxBytes){
-        this.throttleSpecs.add(new ThrottleSchedule(start, end, maxBytes));
-        return this;
     }
 
     int getTargetThrottleRate() {

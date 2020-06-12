@@ -1,6 +1,8 @@
 package io.chiragpatel.data.streams.throttler.impl;
 
 import io.chiragpatel.data.streams.throttler.impl.ScheduledAverageRateThrottler;
+import java.util.Arrays;
+import java.util.Collections;
 import org.joda.time.DateTime;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -30,14 +32,11 @@ public class TestScheduledAverageRateThrottler {
 
     @BeforeMethod
     public void init(){
-        throttler = spy(new ScheduledAverageRateThrottler());
-
-        throttler.addThrottleTimeRange( new ThrottleTime(12,0,0), new ThrottleTime(18,0,0), 64 * 1024);
-        throttler.addThrottleTimeRange(new ThrottleTime(0,0,0), new ThrottleTime(6,0,0), 64);
+        ThrottleSchedule schedule1 = new ThrottleSchedule(new ThrottleTime(12,0,0), new ThrottleTime(18,0,0),64 * 1024);
+        ThrottleSchedule schedule2 = new ThrottleSchedule(new ThrottleTime(0,0,0), new ThrottleTime(6,0,0), 64);
+        throttler = spy(new ScheduledAverageRateThrottler(Arrays.asList(schedule1, schedule2)));
         MockitoAnnotations.initMocks(this);
     }
-
-
 
     @Test
     public void shouldReturnTheRightTargetThrottleRateBetweenTimeRange(){
